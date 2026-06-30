@@ -11,3 +11,6 @@ wheels/
 
 # Other files
 .env
+
+# Data files
+*.db
