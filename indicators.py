@@ -19,10 +19,57 @@ import pandas as pd
 import numpy as np
 import talib
 
-DEFAULT_BASELINE_PERIOD: Final[int] = 3
+DEFAULT_SMA_PERIOD: Final[int] = 3
+DEFAULT_RSI_PERIOD: Final[int] = 14
+
 RANDOM_NUMBERS_UPPER_BOUND: Final[float] = 1.20000
 RANDOM_NUMBERS_LOWER_BOUND: Final[float] = 1.10000
 NUMBER_OF_RANDOM_NUMBERS: Final[int] = 100
+DEFAULT_RANDOM_NUMBERS_DECIMALS: Final[int] = 5
+
+
+def generate_fake_fx_data(
+    lower_bound: float = RANDOM_NUMBERS_LOWER_BOUND,
+    upper_bound: float = RANDOM_NUMBERS_UPPER_BOUND,
+    count: int = NUMBER_OF_RANDOM_NUMBERS,
+    decimals: int = DEFAULT_RANDOM_NUMBERS_DECIMALS,
+) -> pd.DataFrame:
+    """Generate a DataFrame of fake FX closing rates for local testing.
+
+    Draws ``count`` values uniformly at random from the open interval
+    ``(lower_bound, upper_bound)`` and rounds them to ``decimals`` places.
+    Rounding alone can push a value exactly onto ``lower_bound`` or
+    ``upper_bound``; the result is then clipped one unit-in-the-last-place
+    inward on each side so every value stays strictly inside the bounds.
+
+    Args:
+        lower_bound: Exclusive lower bound of the generated rates.
+        upper_bound: Exclusive upper bound of the generated rates.
+        count: Number of rates to generate. Must be a positive integer.
+        decimals: Number of decimal places to round each rate to.
+
+    Returns:
+        A ``pandas.DataFrame`` with a single ``"rate"`` column of length
+        ``count``.
+
+    Raises:
+        ValueError: If ``count`` is not a positive integer.
+    """
+    if count <= 0:
+        raise ValueError(f"count must be a positive integer, got {count}")
+
+    epsilon = 10 ** -decimals
+    rng = np.random.default_rng()
+    raw_random_values = (
+        rng.uniform(low=lower_bound, high=upper_bound, size=count)
+        .round(decimals=decimals)
+    )
+    random_values = np.clip(
+        a=raw_random_values,
+        a_min=lower_bound + epsilon,
+        a_max=upper_bound - epsilon,
+    )
+    return pd.DataFrame({"rate": random_values})
 
 
 def mid(bid: float, ask: float) -> float:
@@ -88,24 +135,16 @@ def sma_in_pandas(values: Sequence[float], period: int) -> pd.Series:
 if __name__ == "__main__":
     sample: list[float] = [1.0, 2.0, 3.0, 4.0, 5.0]
 
-    rng = np.random.default_rng()
-    raw_random_values = (
-        rng
-        .uniform(
-        low=RANDOM_NUMBERS_LOWER_BOUND, 
-        high=RANDOM_NUMBERS_UPPER_BOUND, 
-        size=NUMBER_OF_RANDOM_NUMBERS
-        )
-        .round(decimals=5)
-    )
-    random_values = np.clip(
-        a=raw_random_values,
-        a_min=RANDOM_NUMBERS_LOWER_BOUND,
-        a_max=RANDOM_NUMBERS_UPPER_BOUND
-    )
-    s = pd.DataFrame({"rate": random_values})
+    fake_fx_data = generate_fake_fx_data()
 
-    # line = sma(sample, period=DEFAULT_BASELINE_PERIOD)
-    # line = sma_in_pandas(sample, period=DEFAULT_BASELINE_PERIOD)
+    # line = sma(sample, period=DEFAULT_SMA_PERIOD)
+    # line = sma_in_pandas(sample, period=DEFAULT_SMA_PERIOD)
     # print(line)  # [None, None, 2.0, 3.0, 4.0]
-    print(s)
+    print(fake_fx_data)
+    output = talib.RSI(
+        real=fake_fx_data["rate"].to_numpy(),
+        timeperiod=DEFAULT_RSI_PERIOD
+    )
+    fake_fx_data["RSI_14"] = output
+    print(output)
+    print(fake_fx_data)
