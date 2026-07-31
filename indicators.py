@@ -17,7 +17,7 @@ from typing import Final
 
 import pandas as pd
 
-DEFAULT_BASELINE_PERIOD: Final[int] = 20
+DEFAULT_BASELINE_PERIOD: Final[int] = 3
 
 
 def mid(bid: float, ask: float) -> float:
@@ -82,6 +82,6 @@ def sma_in_pandas(values: Sequence[float], period: int) -> pd.Series:
 
 if __name__ == "__main__":
     sample: list[float] = [1.0, 2.0, 3.0, 4.0, 5.0]
-    # line = sma(sample, period=3)
-    line = sma_in_pandas(sample, period=3)
+    # line = sma(sample, period=DEFAULT_BASELINE_PERIOD)
+    line = sma_in_pandas(sample, period=DEFAULT_BASELINE_PERIOD)
     print(line)  # [None, None, 2.0, 3.0, 4.0]
