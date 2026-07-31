@@ -20,6 +20,9 @@ import numpy as np
 import talib
 
 DEFAULT_BASELINE_PERIOD: Final[int] = 3
+RANDOM_NUMBERS_UPPER_BOUND: Final[float] = 1.20000
+RANDOM_NUMBERS_LOWER_BOUND: Final[float] = 1.10000
+NUMBER_OF_RANDOM_NUMBERS: Final[int] = 100
 
 
 def mid(bid: float, ask: float) -> float:
@@ -84,6 +87,25 @@ def sma_in_pandas(values: Sequence[float], period: int) -> pd.Series:
 
 if __name__ == "__main__":
     sample: list[float] = [1.0, 2.0, 3.0, 4.0, 5.0]
+
+    rng = np.random.default_rng()
+    raw_random_values = (
+        rng
+        .uniform(
+        low=RANDOM_NUMBERS_LOWER_BOUND, 
+        high=RANDOM_NUMBERS_UPPER_BOUND, 
+        size=NUMBER_OF_RANDOM_NUMBERS
+        )
+        .round(decimals=5)
+    )
+    random_values = np.clip(
+        a=raw_random_values,
+        a_min=RANDOM_NUMBERS_LOWER_BOUND,
+        a_max=RANDOM_NUMBERS_UPPER_BOUND
+    )
+    s = pd.DataFrame({"rate": random_values})
+
     # line = sma(sample, period=DEFAULT_BASELINE_PERIOD)
-    line = sma_in_pandas(sample, period=DEFAULT_BASELINE_PERIOD)
-    print(line)  # [None, None, 2.0, 3.0, 4.0]
+    # line = sma_in_pandas(sample, period=DEFAULT_BASELINE_PERIOD)
+    # print(line)  # [None, None, 2.0, 3.0, 4.0]
+    print(s)
