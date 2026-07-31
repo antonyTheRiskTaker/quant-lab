@@ -142,7 +142,7 @@ if __name__ == "__main__":
     # print(line)  # [None, None, 2.0, 3.0, 4.0]
     print(fake_fx_data)
     output = talib.RSI(
-        real=fake_fx_data["rate"].to_numpy(),
+        real=fake_fx_data["close"].to_numpy(),
         timeperiod=DEFAULT_RSI_PERIOD
     )
     fake_fx_data["RSI_14"] = output
