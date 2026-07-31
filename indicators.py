@@ -16,6 +16,8 @@ from statistics import fmean
 from typing import Final
 
 import pandas as pd
+import numpy as np
+import talib
 
 DEFAULT_BASELINE_PERIOD: Final[int] = 3
 
