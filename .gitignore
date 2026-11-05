@@ -14,5 +14,7 @@ wheels/
 
 # Data files
 *.db
+*.db-shm
+*.db-wal
 trading/data/*
 !trading/data/.gitkeep
